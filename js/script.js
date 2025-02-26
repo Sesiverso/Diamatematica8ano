@@ -104,3 +104,8 @@ submitBtn.addEventListener('click', function () {
     scoreEl.textContent = `Pontuação: ${score}`;
     generateQuestion();
 });
+
+    }
+    scoreEl.textContent = `Pontuação: ${score}`;
+    generateQuestion();
+});
