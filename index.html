@@ -8,53 +8,113 @@
         /* Estilo básico do jogo */
         #gameArea {
             width: 300px;
+            height: 600px;<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Matemático</title>
+    <style>
+        /* Estilo básico do jogo */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #gameArea {
+            width: 300px;
             height: 600px;
-            border: 1px solid #000;
+            border: 2px solid #34495e;
+            margin: 20px auto;
             position: relative;
             display: grid;
             grid-template-columns: repeat(10, 30px); /* 10 colunas */
             grid-template-rows: repeat(20, 30px); /* 20 linhas */
+            background-color: #ecf0f1;
         }
 
         .cell {
             width: 30px;
             height: 30px;
-            border: 1px solid #ccc;
-            background-color: lightgrey;
+            background-color: #bdc3c7;
+            border: 1px solid #95a5a6;
         }
 
         .filled {
             background-color: #3498db; /* Cor das peças */
         }
 
-        /* Estilo dos botões */
+        #question {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        #answer {
+            padding: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #7f8c8d;
+        }
+
+        #submitAnswer {
+            padding: 10px 15px;
+            background-color: #2ecc71;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        #submitAnswer:hover {
+            background-color: #27ae60;
+        }
+
         #buttons {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             margin-top: 20px;
         }
+
         .arrow-btn {
             width: 40px;
             height: 40px;
-            background-color: lightblue;
+            background-color: #2980b9;
+            color: white;
+            font-size: 20px;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s ease;
         }
 
-        #question {
-            margin: 10px;
+        .arrow-btn:hover {
+            background-color: #3498db;
         }
+
+        .arrow-btn:active {
+            background-color: #1abc9c;
+        }
+
     </style>
 </head>
 <body>
-
-    <div id="gameArea"></div>
 
     <div id="question">
         <span id="mathQuestion">Qual é 2 + 2?</span>
         <input type="text" id="answer" placeholder="Digite sua resposta">
         <button id="submitAnswer">Responder</button>
     </div>
+
+    <div id="gameArea"></div>
 
     <div id="buttons">
         <button class="arrow-btn" id="leftBtn">←</button>
@@ -67,6 +127,8 @@
         let mathAnswer;
         let currentPiece;
         let currentPosition = { x: 3, y: 0 }; // Posição inicial da peça (canto superior)
+        const gameWidth = 10;
+        const gameHeight = 20;
 
         // Função para gerar uma peça aleatória
         function generatePiece() {
@@ -78,20 +140,21 @@
             ];
             const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
             currentPiece = randomPiece;
+            currentPosition = { x: 3, y: 0 }; // Posição inicial da peça
             renderPiece();
         }
 
         // Função para renderizar a peça no tabuleiro
         function renderPiece() {
             const gameArea = document.getElementById('gameArea');
-            // Limpa o tabuleiro
-            gameArea.innerHTML = '';
+            gameArea.innerHTML = ''; // Limpa o tabuleiro
 
             // Preenche as células do tabuleiro
-            for (let row = 0; row < 20; row++) {
-                for (let col = 0; col < 10; col++) {
+            for (let row = 0; row < gameHeight; row++) {
+                for (let col = 0; col < gameWidth; col++) {
                     const cell = document.createElement('div');
                     cell.classList.add('cell');
+                    // Verifica se a célula pertence à peça
                     if (currentPiece[row - currentPosition.y] && currentPiece[row - currentPosition.y][col - currentPosition.x] === 1) {
                         cell.classList.add('filled');
                     }
@@ -114,43 +177,67 @@
             generateQuestion();
         }
 
-        document.getElementById('submitAnswer').addEventListener('click', function () {
-            const answer = parseInt(document.getElementById('answer').value);
-            if (answer === mathAnswer) {
-                // Resposta correta, gerar a peça
-                alert("Resposta correta! A peça foi gerada.");
-                generatePiece();
-            } else {
-                alert("Resposta incorreta, tente novamente!");
+        // Verifica se a peça está dentro dos limites do tabuleiro
+        function isValidMove(x, y, piece) {
+            for (let row = 0; row < piece.length; row++) {
+                for (let col = 0; col < piece[row].length; col++) {
+                    if (piece[row][col] === 1) {
+                        const newX = x + col;
+                        const newY = y + row;
+                        // Verifica se a peça está fora dos limites do tabuleiro
+                        if (newX < 0 || newX >= gameWidth || newY >= gameHeight) {
+                            return false;
+                        }
+                    }
+                }
             }
-        });
+            return true;
+        }
 
         // Funções para movimentar a peça
         document.getElementById('leftBtn').addEventListener('click', function () {
-            currentPosition.x--;
-            renderPiece();
+            if (isValidMove(currentPosition.x - 1, currentPosition.y, currentPiece)) {
+                currentPosition.x--;
+                renderPiece();
+            }
         });
 
         document.getElementById('rightBtn').addEventListener('click', function () {
-            currentPosition.x++;
-            renderPiece();
+            if (isValidMove(currentPosition.x + 1, currentPosition.y, currentPiece)) {
+                currentPosition.x++;
+                renderPiece();
+            }
         });
 
         document.getElementById('downBtn').addEventListener('click', function () {
-            currentPosition.y++;
-            renderPiece();
+            if (isValidMove(currentPosition.x, currentPosition.y + 1, currentPiece)) {
+                currentPosition.y++;
+                renderPiece();
+            }
         });
 
         document.getElementById('rotateBtn').addEventListener('click', function () {
-            // Rotaciona a peça
-            currentPiece = rotatePiece(currentPiece);
-            renderPiece();
+            const rotatedPiece = rotatePiece(currentPiece);
+            if (isValidMove(currentPosition.x, currentPosition.y, rotatedPiece)) {
+                currentPiece = rotatedPiece;
+                renderPiece();
+            }
         });
 
         // Função para rotacionar a peça
         function rotatePiece(piece) {
             return piece[0].map((_, index) => piece.map(row => row[index])).reverse();
         }
+
+        document.getElementById('submitAnswer').addEventListener('click', function () {
+            const answer = parseInt(document.getElementById('answer').value);
+            if (answer === mathAnswer) {
+                alert("Resposta correta! A peça foi gerada.");
+                generatePiece();
+            } else {
+                alert("Resposta incorreta, tente novamente!");
+            }
+        });
 
         startGame();
     </script>
