@@ -116,10 +116,10 @@
     <div id="score">Pontuação: <span id="scoreValue">0</span></div>
 
     <div id="buttons">
-        <button class="arrow-btn" id="leftBtn">←</button>
-        <button class="arrow-btn" id="rightBtn">→</button>
-        <button class="arrow-btn" id="downBtn">↓</button>
-        <button class="arrow-btn" id="rotateBtn">↻</button>
+        <button class="arrow-btn" id="leftBtn" disabled>←</button>
+        <button class="arrow-btn" id="rightBtn" disabled>→</button>
+        <button class="arrow-btn" id="downBtn" disabled>↓</button>
+        <button class="arrow-btn" id="rotateBtn" disabled>↻</button>
     </div>
 
     <script>
@@ -221,7 +221,7 @@
                 currentPosition.y++;
                 renderPiece();
             } else {
-                // A peça chegou ao limite inferior
+                // A peça chegou ao limite inferior ou colidiu com outras peças
                 lockPiece();
                 checkLines(); // Verifica se há linhas completas
                 generateQuestion();
@@ -234,91 +234,56 @@
             for (let row = 0; row < currentPiece.shape.length; row++) {
                 for (let col = 0; col < currentPiece.shape[row].length; col++) {
                     if (currentPiece.shape[row][col] === 1) {
-                        gameBoard[currentPosition.y + row][currentPosition.x + col] = currentPiece.color; // Preenche o tabuleiro com a cor da peça
+                        gameBoard[currentPosition.y + row - 1][currentPosition.x + col] = currentPiece.color; // Preenche o tabuleiro com a cor da peça
                     }
                 }
             }
         }
 
-        // Função para verificar se uma linha está completa
+        // Função para verificar e remover linhas completas
         function checkLines() {
             for (let row = 0; row < gameHeight; row++) {
                 if (gameBoard[row].every(cell => cell !== 0)) {
-                    // A linha está completa
                     gameBoard.splice(row, 1);
-                    gameBoard.unshift(Array(gameWidth).fill(0)); // Adiciona uma linha vazia no topo
-                    updateScore(100); // Pontos por completar uma linha
+                    gameBoard.unshift(Array(gameWidth).fill(0)); // Adiciona uma nova linha no topo
+                    updateScore(10); // Pontuação por completar a linha
                 }
             }
         }
 
-        // Função para rotacionar a peça
-        function rotatePiece(piece) {
-            const rotated = [];
-            for (let col = 0; col < piece[0].length; col++) {
-                const newRow = [];
-                for (let row = piece.length - 1; row >= 0; row--) {
-                    newRow.push(piece[row][col]);
-                }
-                rotated.push(newRow);
-            }
-            return rotated;
-        }
-
-        // Função para atualizar a pontuação
-        function updateScore(amount) {
-            score += amount;
+        // Atualiza a pontuação
+        function updateScore(points) {
+            score += points;
             const scoreElement = document.getElementById('scoreValue');
             scoreElement.textContent = score;
-
-            if (amount < 0) {
-                // Exibe a pontuação em vermelho quando o jogador erra
+            if (points < 0) {
                 const scoreText = document.getElementById('score');
                 scoreText.classList.add('red');
-                setTimeout(() => {
-                    scoreText.classList.remove('red');
-                }, 3000);
+                setTimeout(() => scoreText.classList.remove('red'), 3000); // Retorna a cor normal após 3 segundos
             }
         }
 
-        // Funções para movimentar a peça
-        document.getElementById('leftBtn').addEventListener('click', function () {
-            if (!canMove) return; // Não permite mover até acertar a questão
-            if (isValidMove(currentPosition.x - 1, currentPosition.y, currentPiece.shape)) {
-                currentPosition.x--;
-                renderPiece();
-            }
-        });
-
-        document.getElementById('rightBtn').addEventListener('click', function () {
-            if (!canMove) return; // Não permite mover até acertar a questão
-            if (isValidMove(currentPosition.x + 1, currentPosition.y, currentPiece.shape)) {
-                currentPosition.x++;
-                renderPiece();
-            }
-        });
-
-        document.getElementById('downBtn').addEventListener('click', movePieceDown);
-
-        document.getElementById('rotateBtn').addEventListener('click', function () {
-            if (!canMove) return; // Não permite mover até acertar a questão
-            const rotatedPiece = rotatePiece(currentPiece.shape);
-            if (isValidMove(currentPosition.x, currentPosition.y, rotatedPiece)) {
-                currentPiece.shape = rotatedPiece;
-                renderPiece();
-            }
-        });
-
-        // Função para verificar a resposta do jogador
-        document.getElementById('submitAnswer').addEventListener('click', function () {
-            const answer = parseInt(document.getElementById('answer').value);
-            if (answer === mathAnswer) {
-                canMove = true; // Habilita a movimentação após acertar a resposta
+        // Função para responder à questão
+        document.getElementById('submitAnswer').addEventListener('click', () => {
+            const answer = document.getElementById('answer').value;
+            if (parseInt(answer) === mathAnswer) {
                 updateScore(10); // Pontuação por acertar
+                canMove = true;
+                document.getElementById('leftBtn').disabled = false;
+                document.getElementById('rightBtn').disabled = false;
+                document.getElementById('downBtn').disabled = false;
+                document.getElementById('rotateBtn').disabled = false;
             } else {
                 updateScore(-10); // Penaliza por errar
             }
         });
+
+        // Inicia o jogo
+        startGame();
+    </script>
+
+</body>
+</html>
 
         startGame();
     </script>
