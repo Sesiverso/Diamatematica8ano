@@ -72,13 +72,23 @@ function countdown() {
     timeLeft--;
     updateTimer();
     if (timeLeft <= 0) {
-        clearInterval(timer);
-        // Aqui você pode adicionar o que fazer quando o tempo acabar
+        clearInterval(timer); // Parar o timer quando o tempo acabar
+        handleTimeUp(); // Chama a função que vai tratar a ação ao acabar o tempo
     }
 }
 
 function updateTimer() {
     timerEl.textContent = `⏳ ${timeLeft}s`;
+}
+
+// --- Função quando o tempo acaba ---
+function handleTimeUp() {
+    if (score > 100) {
+        score -= 100; // Remove 100 pontos se o jogador tiver mais de 100 pontos
+        alert("Você perdeu 100 pontos por não responder a tempo!");
+    }
+    scoreEl.textContent = `Pontuação: ${score}`;
+    generateQuestion(); // Gera uma nova questão
 }
 
 // --- Ação do botão Enviar ---
@@ -94,4 +104,3 @@ submitBtn.addEventListener('click', function () {
     scoreEl.textContent = `Pontuação: ${score}`;
     generateQuestion();
 });
-
