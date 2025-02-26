@@ -94,6 +94,14 @@
             background-color: #1abc9c;
         }
 
+        #score {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+
+        #score.red {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -105,6 +113,7 @@
     </div>
 
     <div id="gameArea"></div>
+    <div id="score">Pontuação: <span id="scoreValue">0</span></div>
 
     <div id="buttons">
         <button class="arrow-btn" id="leftBtn">←</button>
@@ -116,7 +125,9 @@
     <script>
         let mathAnswer;
         let currentPiece;
-        let currentPosition = { x: 3, y: 0 }; // Posição inicial da peça (canto superior)
+        let currentPosition = { x: 3, y: 0 };
+        let gameBoard = Array.from({ length: 20 }, () => Array(10).fill(0)); // Tabuleiro 20x10
+        let score = 0;
         const gameWidth = 10;
         const gameHeight = 20;
 
@@ -128,8 +139,10 @@
                 [[1, 1, 1], [0, 1, 0]], // Peça T
                 [[0, 1, 1], [1, 1, 0]], // Peça S
             ];
+
+            const colors = ["#3498db", "#e74c3c", "#f39c12", "#2ecc71"]; // Azul, Vermelho, Laranja, Verde
             const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
-            currentPiece = randomPiece;
+            currentPiece = { shape: randomPiece, color: colors[Math.floor(Math.random() * colors.length)] };
             currentPosition = { x: 3, y: 0 }; // Posição inicial da peça
             renderPiece();
         }
@@ -145,10 +158,24 @@
                     const cell = document.createElement('div');
                     cell.classList.add('cell');
                     // Verifica se a célula pertence à peça
-                    if (currentPiece[row - currentPosition.y] && currentPiece[row - currentPosition.y][col - currentPosition.x] === 1) {
+                    if (currentPiece.shape[row - currentPosition.y] && currentPiece.shape[row - currentPosition.y][col - currentPosition.x] === 1) {
                         cell.classList.add('filled');
+                        cell.style.backgroundColor = currentPiece.color;
                     }
                     gameArea.appendChild(cell);
+                }
+            }
+
+            // Preenche as células do tabuleiro que já foram ocupadas pelas peças
+            for (let row = 0; row < gameHeight; row++) {
+                for (let col = 0; col < gameWidth; col++) {
+                    if (gameBoard[row][col] !== 0) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('cell');
+                        cell.classList.add('filled');
+                        cell.style.backgroundColor = gameBoard[row][col];
+                        gameArea.appendChild(cell);
+                    }
                 }
             }
         }
@@ -165,6 +192,7 @@
         // Função para iniciar o jogo
         function startGame() {
             generateQuestion();
+            generatePiece();
         }
 
         // Verifica se a peça está dentro dos limites do tabuleiro
@@ -175,7 +203,7 @@
                         const newX = x + col;
                         const newY = y + row;
                         // Verifica se a peça está fora dos limites do tabuleiro
-                        if (newX < 0 || newX >= gameWidth || newY >= gameHeight) {
+                        if (newX < 0 || newX >= gameWidth || newY >= gameHeight || gameBoard[newY] && gameBoard[newY][newX] !== 0) {
                             return false;
                         }
                     }
@@ -184,35 +212,42 @@
             return true;
         }
 
-        // Funções para movimentar a peça
-        document.getElementById('leftBtn').addEventListener('click', function () {
-            if (isValidMove(currentPosition.x - 1, currentPosition.y, currentPiece)) {
-                currentPosition.x--;
-                renderPiece();
-            }
-        });
-
-        document.getElementById('rightBtn').addEventListener('click', function () {
-            if (isValidMove(currentPosition.x + 1, currentPosition.y, currentPiece)) {
-                currentPosition.x++;
-                renderPiece();
-            }
-        });
-
-        document.getElementById('downBtn').addEventListener('click', function () {
-            if (isValidMove(currentPosition.x, currentPosition.y + 1, currentPiece)) {
+        // Função para mover a peça para baixo
+        function movePieceDown() {
+            if (isValidMove(currentPosition.x, currentPosition.y + 1, currentPiece.shape)) {
                 currentPosition.y++;
                 renderPiece();
+            } else {
+                // A peça chegou ao limite inferior
+                lockPiece();
+                checkLines(); // Verifica se há linhas completas
+                generateQuestion();
+                generatePiece();
             }
-        });
+        }
 
-        document.getElementById('rotateBtn').addEventListener('click', function () {
-            const rotatedPiece = rotatePiece(currentPiece);
-            if (isValidMove(currentPosition.x, currentPosition.y, rotatedPiece)) {
-                currentPiece = rotatedPiece;
-                renderPiece();
+        // Função para "travar" a peça no tabuleiro
+        function lockPiece() {
+            for (let row = 0; row < currentPiece.shape.length; row++) {
+                for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                    if (currentPiece.shape[row][col] === 1) {
+                        gameBoard[currentPosition.y + row][currentPosition.x + col] = currentPiece.color; // Preenche o tabuleiro com a cor da peça
+                    }
+                }
             }
-        });
+        }
+
+        // Função para verificar se uma linha está completa
+        function checkLines() {
+            for (let row = 0; row < gameHeight; row++) {
+                if (gameBoard[row].every(cell => cell !== 0)) {
+                    // A linha está completa
+                    gameBoard.splice(row, 1);
+                    gameBoard.unshift(Array(gameWidth).fill(0)); // Adiciona uma linha vazia no topo
+                    updateScore(100); // Pontos por completar uma linha
+                }
+            }
+        }
 
         // Função para rotacionar a peça
         function rotatePiece(piece) {
@@ -227,15 +262,62 @@
             return rotated;
         }
 
+        // Função para atualizar a pontuação
+        function updateScore(amount) {
+            score += amount;
+            const scoreElement = document.getElementById('scoreValue');
+            scoreElement.textContent = score;
+
+            if (amount < 0) {
+                // Exibe a pontuação em vermelho quando o jogador erra
+                const scoreText = document.getElementById('score');
+                scoreText.classList.add('red');
+                setTimeout(() => {
+                    scoreText.classList.remove('red');
+                }, 3000);
+            }
+        }
+
+        // Funções para movimentar a peça
+        document.getElementById('leftBtn').addEventListener('click', function () {
+            if (isValidMove(currentPosition.x - 1, currentPosition.y, currentPiece.shape)) {
+                currentPosition.x--;
+                renderPiece();
+            }
+        });
+
+        document.getElementById('rightBtn').addEventListener('click', function () {
+            if (isValidMove(currentPosition.x + 1, currentPosition.y, currentPiece.shape)) {
+                currentPosition.x++;
+                renderPiece();
+            }
+        });
+
+        document.getElementById('downBtn').addEventListener('click', movePieceDown);
+
+        document.getElementById('rotateBtn').addEventListener('click', function () {
+            const rotatedPiece = rotatePiece(currentPiece.shape);
+            if (isValidMove(currentPosition.x, currentPosition.y, rotatedPiece)) {
+                currentPiece.shape = rotatedPiece;
+                renderPiece();
+            }
+        });
+
+        // Função para verificar a resposta do jogador
         document.getElementById('submitAnswer').addEventListener('click', function () {
             const answer = parseInt(document.getElementById('answer').value);
             if (answer === mathAnswer) {
-                alert("Resposta correta! A peça foi gerada.");
+                updateScore(10); // Ganha 10 pontos por acertar
                 generatePiece();
             } else {
-                alert("Resposta incorreta, tente novamente!");
+                updateScore(-5); // Perde 5 pontos ao errar
             }
         });
+
+        startGame();
+    </script>
+</body>
+</html>
 
         startGame();
     </script>
