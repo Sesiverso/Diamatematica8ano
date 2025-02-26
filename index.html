@@ -7,14 +7,19 @@
 </head>
 <body>
     <h1>Tetris Matemático</h1>
-    <div id="game-container">
-        <canvas id="tetris" width="240" height="400"></canvas>
-        <div id="math-challenge">
-            <p id="question">Resolva: </p>
-            <input type="text" id="answer" placeholder="Resposta">
-            <button id="submit">Enviar</button>
-        </div>
+    <div id="score">Pontuação: 0</div>
+    <canvas id="tetris" width="240" height="400"></canvas>
+
+    <div id="math-challenge">
+        <p id="question">Resolva:</p>
+        <input type="text" id="answer" placeholder="Resposta">
+        <button id="submit">Enviar</button>
+        <p id="timer">⏳ 30s</p>
     </div>
+
+    <audio id="correctSound" src="sounds/correct.mp3"></audio>
+    <audio id="wrongSound" src="sounds/wrong.mp3"></audio>
+
     <script src="js/script.js"></script>
 </body>
 </html>
