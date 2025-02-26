@@ -1,71 +1,139 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+let player = document.getElementById('player');
+let balls = document.querySelectorAll('.ball');
+let triangles = document.querySelectorAll('.triangle');
+let timeLeft = 30;
+let timerElement = document.getElementById('time');
+let questionElement = document.getElementById('question');
+let gameBoard = document.getElementById('board');
+let gameOver = false;
 
-canvas.width = 500;
-canvas.height = 500;
+let playerPos = { x: 0, y: 0 };
+let ballPositions = [];
+let trianglePositions = [];
+let answers = [];
+let correctAnswer = 0;
 
-const cellSize = 25; // Tamanho de cada célula do labirinto
-const rows = canvas.height / cellSize;
-const cols = canvas.width / cellSize;
+function startGame() {
+  gameOver = false;
+  player.style.left = '0px';
+  player.style.top = '0px';
+  ballPositions = [];
+  trianglePositions = [];
+  timeLeft = 30;
+  updateTimer();
 
-let pacMan = { x: 1, y: 1, radius: 10, color: "yellow" };
-let questionText = '';
-let answer = 0;
-let items = [];
-let enemies = [];
+  generateQuestion();
+  moveBalls();
 
-// Definição do labirinto como uma matriz
-const maze = [
-    // 0: caminho, 1: parede
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-];
+  setInterval(() => {
+    if (gameOver) return;
+    timeLeft--;
+    updateTimer();
 
-// Função para desenhar o labirinto
-function drawMaze() {
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            if (maze[row][col] === 1) {
-                ctx.fillStyle = "blue";
-                ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-            }
-        }
+    if (timeLeft <= 0) {
+      alert("Tempo esgotado! Fim de jogo.");
+      resetGame();
     }
+  }, 1000);
 }
 
-// Função para desenhar o Pac-Man
-function drawPacMan() {
-    ctx.beginPath();
-    ctx.arc(pacMan.x * cellSize + cellSize / 2, pacMan.y * cellSize + cellSize / 2, pacMan.radius, 0, Math.PI * 2);
-    ctx.fillStyle = pacMan.color;
-    ctx.fill();
-    ctx.closePath();
+function updateTimer() {
+  timerElement.textContent = `Tempo restante: ${timeLeft}s`;
 }
 
-// Função para desenhar itens (respostas corretas)
-function drawItems() {
-    items.forEach(item => {
-        ctx.beginPath();
-        ctx.arc(item.x * cellSize + cellSize / 2, item.y * cellSize + cellSize / 2, item.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "green";
-        ctx.fill();
-        ctx.closePath();
-    });
+function generateQuestion() {
+  let num1 = Math.floor(Math.random() * 10);
+  let num2 = Math.floor(Math.random() * 10);
+  let questionType = Math.random() < 0.5 ? 'sum' : 'multiply';
+  
+  if (questionType === 'sum') {
+    correctAnswer = num1 + num2;
+    questionElement.textContent = `Pergunta: Quanto é ${num1} + ${num2}?`;
+  } else if (questionType === 'multiply') {
+    correctAnswer = num1 * num2;
+    questionElement.textContent = `Pergunta: Quanto é ${num1} x ${num2}?`;
+  }
+
+  generateAnswerChoices();
 }
 
-// Função para desenhar inimigos
-function drawEnemies() {
-    enemies.forEach(enemy => {
-        ctx.beginPath();
-        ctx.arc(enemy.x * cellSize + cellSize / 2, enemy.y
-::contentReference[oaicite:0]{index=0}
- 
+function generateAnswerChoices() {
+  answers = [correctAnswer, correctAnswer + 1, correctAnswer - 1];
+  answers = shuffle(answers);
+
+  for (let i = 0; i < 3; i++) {
+    triangles[i].textContent = answers[i];
+    trianglePositions[i] = { x: Math.random() * 240, y: Math.random() * 240 };
+    triangles[i].style.left = `${trianglePositions[i].x}px`;
+    triangles[i].style.top = `${trianglePositions[i].y}px`;
+  }
+}
+
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+function moveBalls() {
+  balls.forEach((ball, index) => {
+    let ballPos = { x: Math.random() * 280, y: Math.random() * 280 };
+    ballPositions.push(ballPos);
+    ball.style.left = `${ballPos.x}px`;
+    ball.style.top = `${ballPos.y}px`;
+
+    setInterval(() => {
+      if (gameOver) return;
+      ballPos.x += (Math.random() - 0.5) * 10;
+      ballPos.y += (Math.random() - 0.5) * 10;
+
+      if (ballPos.x < 0 || ballPos.x > 280) ballPos.x = Math.random() * 280;
+      if (ballPos.y < 0 || ballPos.y > 280) ballPos.y = Math.random() * 280;
+
+      ball.style.left = `${ballPos.x}px`;
+      ball.style.top = `${ballPos.y}px`;
+    }, 100);
+  });
+}
+
+gameBoard.addEventListener('mousemove', (e) => {
+  if (gameOver) return;
+  playerPos.x = e.clientX - gameBoard.offsetLeft - player.offsetWidth / 2;
+  playerPos.y = e.clientY - gameBoard.offsetTop - player.offsetHeight / 2;
+  player.style.left = `${playerPos.x}px`;
+  player.style.top = `${playerPos.y}px`;
+
+  balls.forEach((ball) => {
+    if (checkCollision(ball)) {
+      alert('Você colidiu com uma bolinha! Jogo reiniciado.');
+      resetGame();
+    }
+  });
+
+  triangles.forEach((triangle, index) => {
+    if (checkCollision(triangle)) {
+      if (answers[index] === correctAnswer) {
+        alert('Parabéns! Você encontrou a resposta correta!');
+        resetGame();
+      } else {
+        alert('Resposta errada! Tente novamente.');
+        resetGame();
+      }
+    }
+  });
+});
+
+function checkCollision(element) {
+  let elementRect = element.getBoundingClientRect();
+  let playerRect = player.getBoundingClientRect();
+  return !(elementRect.right < playerRect.left || 
+           elementRect.left > playerRect.right || 
+           elementRect.bottom < playerRect.top || 
+           elementRect.top > playerRect.bottom);
+}
+
+function resetGame() {
+  gameOver = true;
+  setTimeout(startGame, 1000); // reinicia o jogo após 1 segundo
+}
+
+startGame();
+
