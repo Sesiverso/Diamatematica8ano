@@ -180,12 +180,12 @@
             }
         }
 
-        // Função para gerar perguntas
+        // Função para gerar perguntas (com correção)
         function generateQuestion() {
             const num1 = Math.floor(Math.random() * 10) + 1;
-            const num2 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * num1) + 1; // Assegura que o num2 seja menor ou igual ao num1 para subtração
             const operation = Math.random() > 0.5 ? '+' : '-';
-            mathAnswer = eval(`${num1} ${operation} ${num2}`);
+            mathAnswer = operation === '+' ? num1 + num2 : num1 - num2; // Garante que a operação seja válida
             document.getElementById('mathQuestion').textContent = `Qual é ${num1} ${operation} ${num2}?`;
         }
 
@@ -319,7 +319,5 @@
 </body>
 </html>
 
-        startGame();
-    </script>
 </body>
 </html>
