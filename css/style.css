@@ -1,1 +1,23 @@
 
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+}
+
+#game-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+canvas {
+    background-color: #000;
+}
+
+#math-challenge {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
