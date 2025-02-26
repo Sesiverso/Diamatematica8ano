@@ -131,6 +131,7 @@
         const gameWidth = 10;
         const gameHeight = 20;
         let canMove = false; // Controle para impedir movimento até acertar a questão
+        let isPieceLocked = false; // Verifica se a peça foi travada
 
         // Função para gerar uma peça aleatória
         function generatePiece() {
@@ -145,6 +146,7 @@
             const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
             currentPiece = { shape: randomPiece, color: colors[Math.floor(Math.random() * colors.length)] };
             currentPosition = { x: 3, y: 0 }; // Posição inicial da peça
+            isPieceLocked = false; // Reseta a flag de travamento
             renderPiece();
         }
 
@@ -196,7 +198,7 @@
             generatePiece();
         }
 
-        // Verifica se a peça está dentro dos limites do tabuleiro
+        // Função para verificar se a peça está dentro dos limites do tabuleiro
         function isValidMove(x, y, piece) {
             for (let row = 0; row < piece.length; row++) {
                 for (let col = 0; col < piece[row].length; col++) {
@@ -215,7 +217,7 @@
 
         // Função para mover a peça para baixo
         function movePieceDown() {
-            if (!canMove) return; // Não permite mover até a resposta ser correta
+            if (!canMove || isPieceLocked) return; // Não permite mover até a resposta ser correta ou se a peça já foi travada
 
             if (isValidMove(currentPosition.x, currentPosition.y + 1, currentPiece.shape)) {
                 currentPosition.y++;
@@ -231,13 +233,15 @@
 
         // Função para "travar" a peça no tabuleiro
         function lockPiece() {
+            // Adiciona a peça no tabuleiro na última linha disponível
             for (let row = 0; row < currentPiece.shape.length; row++) {
                 for (let col = 0; col < currentPiece.shape[row].length; col++) {
                     if (currentPiece.shape[row][col] === 1) {
-                        gameBoard[currentPosition.y + row - 1][currentPosition.x + col] = currentPiece.color; // Preenche o tabuleiro com a cor da peça
+                        gameBoard[currentPosition.y + row][currentPosition.x + col] = currentPiece.color; // Preenche o tabuleiro com a cor da peça
                     }
                 }
             }
+            isPieceLocked = true;
         }
 
         // Função para verificar e remover linhas completas
@@ -285,8 +289,6 @@
 </body>
 </html>
 
-        startGame();
-    </script>
 
 </body>
 </html>
