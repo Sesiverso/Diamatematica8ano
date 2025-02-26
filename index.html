@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Tetris Matemático</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris Matemático</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Tetris Matemático</h1>
-    <div id="score">Pontuação: 0</div>
-    <canvas id="tetris" width="240" height="400"></canvas>
-
-    <div id="math-challenge">
-        <p id="question">Resolva:</p>
-        <input type="text" id="answer" placeholder="Resposta">
-        <button id="submit">Enviar</button>
-        <p id="timer">⏳ 30s</p>
+  <div class="game-container">
+    <div class="score">Pontos: <span id="score">0</span></div>
+    <div id="gameCanvas"></div>
+    <div id="question"></div>
+    <div id="answer-buttons">
+      <button onclick="checkAnswer(0)">A</button>
+      <button onclick="checkAnswer(1)">B</button>
+      <button onclick="checkAnswer(2)">C</button>
+      <button onclick="checkAnswer(3)">D</button>
     </div>
-
-   <audio id="correctSound" src="js/sounds/correct.mp3"></audio>
-<audio id="wrongSound" src="js/sounds/wrong.mp3"></audio>
-
-
-    <script src="js/script.js"></script>
+    <div id="move-buttons">
+      <button onclick="movePiece('left')">←</button>
+      <button onclick="movePiece('right')">→</button>
+      <button onclick="movePiece('down')">↓</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
