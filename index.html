@@ -6,16 +6,6 @@
     <title>Tetris Matemático</title>
     <style>
         /* Estilo básico do jogo */
-        #gameArea {
-            width: 300px;
-            height: 600px;<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tetris Matemático</title>
-    <style>
-        /* Estilo básico do jogo */
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f0f4f8;
@@ -226,7 +216,15 @@
 
         // Função para rotacionar a peça
         function rotatePiece(piece) {
-            return piece[0].map((_, index) => piece.map(row => row[index])).reverse();
+            const rotated = [];
+            for (let col = 0; col < piece[0].length; col++) {
+                const newRow = [];
+                for (let row = piece.length - 1; row >= 0; row--) {
+                    newRow.push(piece[row][col]);
+                }
+                rotated.push(newRow);
+            }
+            return rotated;
         }
 
         document.getElementById('submitAnswer').addEventListener('click', function () {
