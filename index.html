@@ -130,6 +130,7 @@
         let score = 0;
         const gameWidth = 10;
         const gameHeight = 20;
+        let canMove = false; // Controle para impedir movimento até acertar a questão
 
         // Função para gerar uma peça aleatória
         function generatePiece() {
@@ -214,6 +215,8 @@
 
         // Função para mover a peça para baixo
         function movePieceDown() {
+            if (!canMove) return; // Não permite mover até a resposta ser correta
+
             if (isValidMove(currentPosition.x, currentPosition.y + 1, currentPiece.shape)) {
                 currentPosition.y++;
                 renderPiece();
@@ -280,6 +283,7 @@
 
         // Funções para movimentar a peça
         document.getElementById('leftBtn').addEventListener('click', function () {
+            if (!canMove) return; // Não permite mover até acertar a questão
             if (isValidMove(currentPosition.x - 1, currentPosition.y, currentPiece.shape)) {
                 currentPosition.x--;
                 renderPiece();
@@ -287,6 +291,7 @@
         });
 
         document.getElementById('rightBtn').addEventListener('click', function () {
+            if (!canMove) return; // Não permite mover até acertar a questão
             if (isValidMove(currentPosition.x + 1, currentPosition.y, currentPiece.shape)) {
                 currentPosition.x++;
                 renderPiece();
@@ -296,6 +301,7 @@
         document.getElementById('downBtn').addEventListener('click', movePieceDown);
 
         document.getElementById('rotateBtn').addEventListener('click', function () {
+            if (!canMove) return; // Não permite mover até acertar a questão
             const rotatedPiece = rotatePiece(currentPiece.shape);
             if (isValidMove(currentPosition.x, currentPosition.y, rotatedPiece)) {
                 currentPiece.shape = rotatedPiece;
@@ -307,17 +313,15 @@
         document.getElementById('submitAnswer').addEventListener('click', function () {
             const answer = parseInt(document.getElementById('answer').value);
             if (answer === mathAnswer) {
-                updateScore(10); // Ganha 10 pontos por acertar
-                generatePiece();
+                canMove = true; // Habilita a movimentação após acertar a resposta
+                updateScore(10); // Pontuação por acertar
             } else {
-                updateScore(-5); // Perde 5 pontos ao errar
+                updateScore(-10); // Penaliza por errar
             }
         });
 
         startGame();
     </script>
-</body>
-</html>
 
 </body>
 </html>
