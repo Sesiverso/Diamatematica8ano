@@ -72,4 +72,26 @@ function countdown() {
     timeLeft--;
     updateTimer();
     if (timeLeft <= 0) {
-        clear
+        clearInterval(timer);
+        // Aqui você pode adicionar o que fazer quando o tempo acabar
+    }
+}
+
+function updateTimer() {
+    timerEl.textContent = `⏳ ${timeLeft}s`;
+}
+
+// --- Ação do botão Enviar ---
+submitBtn.addEventListener('click', function () {
+    const userAnswer = parseInt(answerEl.value, 10);
+    if (userAnswer === correctAnswer) {
+        correctSound.play();
+        score += 10;
+    } else {
+        wrongSound.play();
+        score -= 5;
+    }
+    scoreEl.textContent = `Pontuação: ${score}`;
+    generateQuestion();
+});
+
