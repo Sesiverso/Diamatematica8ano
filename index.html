@@ -1,28 +1,104 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tetris Matemático</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Matemático</title>
+    <style>
+        /* Estilo básico do jogo */
+        #gameArea {
+            width: 300px;
+            height: 600px;
+            border: 1px solid #000;
+            position: relative;
+        }
+        #question {
+            margin: 10px;
+        }
+        #buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .arrow-btn {
+            width: 40px;
+            height: 40px;
+            background-color: lightblue;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <div class="game-container">
-    <div class="score">Pontos: <span id="score">0</span></div>
-    <div id="gameCanvas"></div>
-    <div id="question"></div>
-    <div id="answer-buttons">
-      <button onclick="checkAnswer(0)">A</button>
-      <button onclick="checkAnswer(1)">B</button>
-      <button onclick="checkAnswer(2)">C</button>
-      <button onclick="checkAnswer(3)">D</button>
+
+    <div id="gameArea">
+        <!-- O tabuleiro de jogo será aqui -->
     </div>
-    <div id="move-buttons">
-      <button onclick="movePiece('left')">←</button>
-      <button onclick="movePiece('right')">→</button>
-      <button onclick="movePiece('down')">↓</button>
+
+    <div id="question">
+        <span id="mathQuestion">Qual é 2 + 2?</span>
+        <input type="text" id="answer" placeholder="Digite sua resposta">
+        <button id="submitAnswer">Responder</button>
     </div>
-  </div>
-  <script src="script.js"></script>
+
+    <div id="buttons">
+        <button class="arrow-btn" id="leftBtn">←</button>
+        <button class="arrow-btn" id="rightBtn">→</button>
+        <button class="arrow-btn" id="downBtn">↓</button>
+        <button class="arrow-btn" id="rotateBtn">↻</button>
+    </div>
+
+    <script>
+        let currentPiece;
+        let mathAnswer;
+
+        // Função para gerar perguntas
+        function generateQuestion() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            const operation = Math.random() > 0.5 ? '+' : '-';
+            mathAnswer = eval(`${num1} ${operation} ${num2}`);
+            document.getElementById('mathQuestion').textContent = `Qual é ${num1} ${operation} ${num2}?`;
+        }
+
+        // Função para iniciar o jogo
+        function startGame() {
+            generateQuestion();
+        }
+
+        document.getElementById('submitAnswer').addEventListener('click', function () {
+            const answer = parseInt(document.getElementById('answer').value);
+            if (answer === mathAnswer) {
+                // Resposta correta, liberar o movimento da peça
+                alert("Resposta correta! Agora você pode mover a peça.");
+                // Iniciar a peça no jogo (aqui você começaria a lógica do Tetris)
+            } else {
+                alert("Resposta incorreta, tente novamente!");
+            }
+        });
+
+        // Função para movimentar a peça com as setas
+        document.getElementById('leftBtn').addEventListener('click', function () {
+            // Lógica para mover a peça para a esquerda
+            console.log("Mover para a esquerda");
+        });
+
+        document.getElementById('rightBtn').addEventListener('click', function () {
+            // Lógica para mover a peça para a direita
+            console.log("Mover para a direita");
+        });
+
+        document.getElementById('downBtn').addEventListener('click', function () {
+            // Lógica para mover a peça para baixo
+            console.log("Mover para baixo");
+        });
+
+        document.getElementById('rotateBtn').addEventListener('click', function () {
+            // Lógica para rotacionar a peça
+            console.log("Rotacionar peça");
+        });
+
+        startGame();
+    </script>
 </body>
 </html>
