@@ -1,35 +1,29 @@
-body, html {
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+    background-color: #000;
 }
 
 #game-container {
     position: relative;
-    width: 100%;
-    height: 100%;
 }
 
 #gameCanvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-    background-color: #e0e0e0;
-    margin: 0;
-    padding: 0;
-    border: none;
+    border: 2px solid #fff;
+    background-color: #111;
 }
 
-#question-container {
+#question {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #000;
-    font-size: 18px;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
 }
 
-#timer {
-    font-size: 14px;
-}
