@@ -11,19 +11,21 @@ let question = '';
 let correctAnswer = 0;
 let timeLeft = 30;
 let timerInterval;
+let prizeCubes = []; // Array para os cubos
 
-// Definição do labirinto fixo
+// Definição do labirinto fixo (maior e mais detalhado)
 const maze = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 0, 1, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 1, 0, 1, 1],
-    [1, 1, 1, 0, 1, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 1, 1, 1, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-    [1, 0, 1, 0, 0, 0, 1, 0, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1],
+    [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1],
+    [1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ];
 
 // Função para gerar a pergunta
@@ -40,19 +42,40 @@ function generateQuestion() {
         correctAnswer = eval(`${num1} ${op} ${num2}`);
         question = `${num1} ${op} ${num2}`;
     }
+
+    // Gerando os cubos com as respostas
+    generateCubes();
     displayQuestion();
 }
 
-// Exibe a pergunta e as respostas falsas
+// Exibe a pergunta
 function displayQuestion() {
-    const answers = [correctAnswer, correctAnswer + 1, correctAnswer - 1, correctAnswer + 2];
-    answers.sort(() => Math.random() - 0.5);
-    document.getElementById('question').textContent = `${question} | Respostas: ${answers.join(', ')}`;
+    document.getElementById('question').textContent = `Pergunta: ${question}`;
+}
+
+// Função para gerar os cubos de resposta
+function generateCubes() {
+    prizeCubes = [];
+    
+    // Gerar cubos com respostas
+    for (let i = 0; i < 5; i++) {
+        let answer = i === 0 ? correctAnswer : Math.floor(Math.random() * 50); // Apenas um cubo terá a resposta correta
+        let cube = {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: 30,
+            text: answer,
+            correct: answer === correctAnswer // Indica se a resposta é correta
+        };
+        prizeCubes.push(cube);
+    }
 }
 
 // Função para movimentar o jogador com base no mouse
 function movePlayer(e) {
     let mousePos = getMousePos(e);
+    
+    // Verifica se a nova posição do mouse é válida (sem atravessar paredes)
     if (canMove(mousePos.x, mousePos.y)) {
         player.x = mousePos.x;
         player.y = mousePos.y;
@@ -69,7 +92,9 @@ function getMousePos(e) {
 function canMove(x, y) {
     const gridX = Math.floor(x / 50); // Ajuste de acordo com o tamanho da célula
     const gridY = Math.floor(y / 50);
-    return maze[gridY] && maze[gridY][gridX] === 0; // Verifica se a célula está vazia
+    
+    // Verifica se a célula está vazia (0) ou se há uma parede (1)
+    return maze[gridY] && maze[gridY][gridX] === 0; // Retorna 'true' apenas se o caminho estiver livre
 }
 
 // Função para desenhar o jogo
@@ -85,6 +110,9 @@ function drawGame() {
     ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
     ctx.fill();
 
+    // Desenha os cubos de resposta
+    drawPrizeCubes();
+
     // Desenha os inimigos
     enemies.forEach(enemy => {
         ctx.fillStyle = 'red';
@@ -93,8 +121,8 @@ function drawGame() {
         ctx.fill();
     });
 
-    // Exibe a pergunta e o tempo restante
-    document.getElementById("time").textContent = timeLeft;
+    // Exibe a pergunta
+    document.getElementById("question").textContent = `Pergunta: ${question}`;
 }
 
 // Função para desenhar o labirinto
@@ -107,6 +135,39 @@ function drawMaze() {
             }
         }
     }
+}
+
+// Função para desenhar os cubos com as respostas
+function drawPrizeCubes() {
+    prizeCubes.forEach(cube => {
+        ctx.fillStyle = cube.correct ? 'green' : 'red'; // Verde para a resposta correta, vermelho para as erradas
+        ctx.fillRect(cube.x, cube.y, cube.size, cube.size);
+        ctx.fillStyle = 'black';
+        ctx.font = "16px Arial";
+        ctx.fillText(cube.text, cube.x + 5, cube.y + cube.size / 2);
+    });
+}
+
+// Função para verificar colisão com os cubos
+function checkCubeCollisions() {
+    prizeCubes.forEach(cube => {
+        const dx = player.x - (cube.x + cube.size / 2);
+        const dy = player.y - (cube.y + cube.size / 2);
+        const distance = Math.hypot(dx, dy);
+        if (distance < player.size + cube.size / 2) {
+            if (cube.correct) {
+                alert("Você ganhou!");
+                // Reiniciar o jogo ou passar para o próximo nível
+                generateQuestion(); // Reinicia a pergunta
+            } else {
+                alert("Resposta errada! Comece de novo.");
+                // Reiniciar o jogo
+                player.x = 100;
+                player.y = 100;
+                generateQuestion(); // Reinicia a pergunta
+            }
+        }
+    });
 }
 
 // Função para criar inimigos (bolinhas vermelhas)
@@ -135,52 +196,20 @@ function moveEnemies() {
     });
 }
 
-// Função para verificar colisões com os inimigos
-function checkEnemyCollisions() {
-    enemies.forEach(enemy => {
-        const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-        if (dist < player.size + 10) {
-            resetGame();
-        }
-    });
-}
-
-// Função de temporizador
-function startTimer() {
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-            resetGame();
-        }
-    }, 1000);
-}
-
-// Função para reiniciar o jogo
-function resetGame() {
-    timeLeft = 30;
-    generateQuestion();
-    createEnemies();
-    startTimer();
-}
-
-// Evento de movimentação do mouse
-canvas.addEventListener('mousemove', movePlayer);
-
-// Função principal do jogo
+// Loop principal do jogo
 function gameLoop() {
     drawGame();
     moveEnemies();
-    checkEnemyCollisions();
+    checkCubeCollisions();
 }
 
-generateQuestion();
-createEnemies();
-startTimer();
-
-setInterval(gameLoop, 1000 / 60);
-
-    checkCollisions();
-    checkEnemyCollisions();
+// Função de inicialização
+function init() {
+    generateQuestion(); // Inicializa a primeira pergunta
+    createEnemies(); // Cria os inimigos
+    setInterval(gameLoop, 1000 / 60); // Atualiza o jogo a 60fps
 }
 
-setInterval(gameLoop, 1000 / 60);
+// Inicia o jogo
+init();
+
