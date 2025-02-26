@@ -1,4 +1,5 @@
 // Aguardar o carregamento completo do DOM
+// Aguardar o carregamento completo do DOM
 window.onload = function() {
   const canvas = document.getElementById('gameCanvas');
   
@@ -19,6 +20,8 @@ window.onload = function() {
     }
 
     // Função para gerar questões matemáticas
+    let answerOptions = [];  // Defina answerOptions fora de qualquer função para acessá-la globalmente
+
     function generateQuestion() {
       const num1 = Math.floor(Math.random() * 10) + 1;
       const num2 = Math.floor(Math.random() * 10) + 1;
@@ -27,9 +30,12 @@ window.onload = function() {
       const correctAnswer = operation === '+' ? num1 + num2 : num1 - num2;
 
       // Geração de alternativas
-      let answerOptions = [correctAnswer, correctAnswer + 1, correctAnswer - 1, Math.floor(Math.random() * 20)];
+      answerOptions = [correctAnswer, correctAnswer + 1, correctAnswer - 1, Math.floor(Math.random() * 20)];
       answerOptions = shuffle(answerOptions);
       document.getElementById('question').textContent = `Qual é o resultado de: ${currentQuestion}`;
+
+      // Retorna o correto para ser usado na função checkAnswer
+      return correctAnswer;
     }
 
     // Função para embaralhar as alternativas
@@ -39,7 +45,7 @@ window.onload = function() {
 
     // Função para verificar a resposta
     function checkAnswer(selected) {
-      const correctAnswer = generateQuestion().correctAnswer;
+      const correctAnswer = generateQuestion();  // Chama a função para obter a resposta correta
       if (answerOptions[selected] === correctAnswer) {
         score += 10;
       } else {
@@ -94,3 +100,4 @@ window.onload = function() {
     console.error('Canvas não encontrado!');
   }
 };
+
